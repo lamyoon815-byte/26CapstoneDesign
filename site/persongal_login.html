@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<!-- 로그인: 아이디·비밀번호 로그인(서버 연동 전) + 예선 시연용 데모 계정 3명. 데모 계정 내용은 목데이터, 고른 계정을 다른 페이지에 반영하는 것은 [연동 예정] -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="author" content="인공지능공학부 2511798 김규린">
+<title>로그인 | PERSONGAL</title>
+<meta name="description" content="PERSONGAL 로그인. 예선 시연용 데모 계정으로 둘러볼 수도 있어요.">
+<link rel="stylesheet" href="9_올리브송_common.css">
+<style>
+  :root {
+    --w-container: 1020px;
+    --r-lg: 20px;
+    --r-md: 12px;
+    --c-on-point-sub: #c9d6f5;
+    --ease: cubic-bezier(.16, 1, .3, 1);
+    --c-hero-end: #4a7ee0;
+    --c-hero-glow: rgb(255 255 255 / 16%);
+    --c-hero-shade: rgb(23 58 134 / 70%);
+    --scrim-soft: rgb(17 17 17 / 16%);
+    --scrim: rgb(17 17 17 / 45%);
+    --shadow-float: 0 4px 14px rgb(17 17 17 / 14%);
+    --shadow-panel: 8px 0 24px rgb(17 17 17 / 18%);
+    --shadow-card: 0 8px 24px rgb(23 58 134 / 18%);
+    --c-on-point-fill: rgb(255 255 255 / 16%);
+    --c-on-point-line: rgb(255 255 255 / 40%);
+    --scrim-count: rgb(17 17 17 / 28%);
+    --tone-summer: #E88AA8;
+    --tone-spring: #FF9F80;
+    --tone-winter: #7A1F3D;
+    --c-warn-bg: #fbeaea;
+    --c-ok-bg: #e3f3e9;
+    --c-caution-ink: #8a5a00;
+  }
+  html { scroll-behavior: smooth; }
+  html, body { overflow-x: clip; }
+  body { word-break: keep-all; }
+  h1, h2 { text-wrap: balance; }
+  input { caret-color: var(--c-point); }
+  ::selection { background: var(--c-point-light); color: var(--c-point-dark); }
+  :focus-visible { outline: 2px solid var(--c-point); outline-offset: 2px; }
+  .footer .container { max-width: 100%; }
+  .ico { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+  .tbd { color: var(--c-text-sub); font-weight: 700; }
+
+  /* ===== 상단 띠 + 한 줄 헤더 (퍼스널컬러 2안과 동일) ===== */
+  .topbar { background: var(--c-white); font-size: 13px; }
+  .topbar .container { height: 34px; display: flex; align-items: center; justify-content: flex-end; }
+  .topbar nav { display: flex; gap: 16px; }
+  .topbar nav a { color: var(--c-text-sub); }
+  .topbar nav a:hover { color: var(--c-point); }
+
+  .hd { position: sticky; top: 0; z-index: 40; background: var(--c-white); box-shadow: 0 1px 0 var(--c-border); }
+  .hd > .container { height: 72px; display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 24px; }
+  .hd .left { display: flex; align-items: center; gap: 12px; }
+  .hd .logo { height: 30px; font-size: 24px; font-weight: 900; font-style: normal; letter-spacing: -0.02em; color: var(--c-point); }
+  .hd-nav { display: flex; gap: 36px; font-size: 17px; font-weight: 700; white-space: nowrap; }
+  .hd-nav a { position: relative; height: 72px; display: flex; align-items: center; color: var(--c-nav); }
+  .hd-nav a::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 3px; background: var(--c-point); transform: scaleX(0); transition: transform .2s var(--ease); }
+  .hd-nav a:hover { color: var(--c-point); }
+  .hd-nav a:hover::after { transform: scaleX(1); }
+  .hd .right { justify-self: end; display: flex; align-items: center; gap: 4px; }
+  .hd-cta { height: 36px; margin-right: 8px; padding: 0 16px; border-radius: 18px; background: var(--c-main); color: var(--c-white); font-size: var(--fs-sm); font-weight: 700; display: inline-flex; align-items: center; transition: background-color .2s, opacity .2s var(--sf-ease), transform .2s var(--sf-ease); }
+  .hd-cta:hover { background: var(--c-point); }
+  .ib { position: relative; width: 44px; height: 44px; border: 0; border-radius: 50%; background: none; color: var(--c-main); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: background-color .2s, color .2s; }
+  .ib:hover { background: var(--c-bg-sub); color: var(--c-point); }
+  .ib .ico { width: 24px; height: 24px; }
+  .hcnt { position: absolute; top: 4px; right: 2px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--c-sale); color: var(--c-white); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .hcnt[hidden] { display: none; }
+
+  .hd { --sf-ease: cubic-bezier(.4, 0, .6, 1); }
+  .hd-nav a { transition: opacity .2s var(--sf-ease), transform .2s var(--sf-ease); }
+  .hd.sf-on { box-shadow: none; }
+  .js .hd.sf-on .hd-nav a, .js .hd.sf-on .hd-cta { opacity: 0; transform: scale(.94); pointer-events: none; }
+  .hd:not(.sf-on) .hd-nav a { transition-delay: calc(var(--n, 0) * 20ms + 180ms); }
+  .sf { position: absolute; left: 0; right: 0; top: 100%; background: var(--c-white); border-bottom: 1px solid var(--c-border); clip-path: inset(0 0 100% 0); visibility: hidden; transition: clip-path .32s var(--sf-ease), visibility 0s .32s; }
+  .hd.sf-on .sf { clip-path: inset(0); visibility: visible; transition: clip-path .44s var(--sf-ease), visibility 0s; }
+  .sf .container { width: 800px; padding-top: 24px; padding-bottom: 52px; }
+  .sf-form { display: flex; align-items: center; gap: 12px; border-bottom: 2px solid var(--c-bg-sub); transition: border-color .2s; }
+  .sf-form:focus-within { border-color: var(--c-point); }
+  .sf-form > .ico { width: 26px; height: 26px; color: var(--c-text-sub); }
+  .sf-form input { flex: 1; min-width: 0; height: 64px; border: 0; background: none; font: inherit; font-size: 26px; font-weight: 700; letter-spacing: -.02em; color: var(--c-main); outline: none; }
+  .sf-form input::placeholder { color: var(--c-text-sub); font-weight: 600; }
+  .sf-form input::-webkit-search-cancel-button { appearance: none; }
+  .sf-form .ib[hidden] { display: none; }
+  .sf-k { margin: 28px 0 10px; font-size: var(--fs-sm); font-weight: 700; color: var(--c-text-sub); }
+  .sf-links a { min-height: 40px; display: flex; align-items: center; gap: 10px; font-size: var(--fs-md); font-weight: 700; color: var(--c-main); }
+  .sf-links a .ico { width: 16px; height: 16px; color: var(--c-text-sub); transition: transform .2s var(--sf-ease), color .2s; }
+  .sf-links a:hover { color: var(--c-point); }
+  .sf-links a:hover .ico { color: var(--c-point); transform: translateX(3px); }
+  .js .sf-stg { opacity: 0; transform: translateY(-8px); transition: opacity .12s var(--sf-ease), transform .12s var(--sf-ease); }
+  .js .hd.sf-on .sf-stg { opacity: 1; transform: none; transition: opacity .36s var(--sf-ease) calc(var(--i) * 35ms + 140ms), transform .36s var(--sf-ease) calc(var(--i) * 35ms + 140ms); }
+  .sf-scrim { position: fixed; inset: 0; z-index: 39; background: var(--scrim-soft); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); opacity: 0; visibility: hidden; transition: opacity .32s var(--sf-ease), visibility 0s .32s; }
+  .sf-scrim.on { opacity: 1; visibility: visible; transition: opacity .44s var(--sf-ease), visibility 0s; }
+
+  .drawer { position: fixed; inset: 0; z-index: 60; }
+  .drawer[hidden] { display: none; }
+  .drawer .scrim { position: absolute; inset: 0; background: var(--scrim); }
+  .drawer .panel { position: absolute; left: 0; top: 0; bottom: 0; width: min(340px, 86vw); padding: 20px 24px 32px; background: var(--c-white); overflow-y: auto; box-shadow: var(--shadow-panel); animation: slide .28s var(--ease); }
+  @keyframes slide { from { transform: translateX(-100%); } }
+  .drawer .p-hd { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .drawer h2 { margin: 0; font-size: var(--fs-lg); }
+  .drawer nav { display: grid; }
+  .drawer nav a { min-height: 52px; display: flex; align-items: center; font-size: var(--fs-md); font-weight: 700; border-bottom: 1px solid var(--c-bg-sub); }
+  .drawer .sub { margin-top: 24px; display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: var(--fs-base); color: var(--c-text-sub); }
+
+  /* ===== 버튼 (2안과 동일) ===== */
+  .b {
+    height: 48px; padding: 0 20px; border: 0; border-radius: 24px; font: inherit; font-size: var(--fs-md); font-weight: 700;
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px; cursor: pointer; white-space: nowrap;
+    transition: background-color .2s, color .2s, transform .15s var(--ease);
+  }
+  .b:active { transform: scale(.97); }
+  .b-fill { background: var(--c-point); color: var(--c-white); }
+  .b-fill:hover { background: var(--c-point-dark); }
+  .b-line { background: var(--c-white); color: var(--c-point); box-shadow: inset 0 0 0 1.5px var(--c-point); }
+  .b-line:hover { background: var(--c-point-light); }
+
+  /* ===== 공통: 페이지 머리, 폼, 상태 표시 ===== */
+  .b-wide { width: 100%; height: 52px; }
+  .page-hd { padding: 40px 0 0; }
+  .crumb { margin: 0 0 12px; font-size: var(--fs-sm); color: var(--c-text-sub); }
+  .crumb a:hover { color: var(--c-point); text-decoration: underline; text-underline-offset: 3px; }
+  .page-hd h1 { margin: 0; font-size: 32px; letter-spacing: -0.03em; }
+  .page-hd .lead { margin: 8px 0 0; font-size: var(--fs-md); line-height: 1.6; color: var(--c-text-sub); }
+  .narrow { max-width: 480px; padding-bottom: 80px; }
+  .si { width: 18px; height: 18px; flex: none; color: var(--k, var(--c-text-sub)); }
+  .k-ok { --k: var(--c-safe); --k-bg: var(--c-ok-bg); }
+  .k-mine { --k: var(--c-sale); --k-bg: var(--c-warn-bg); }
+  .tag { display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 8px; background: var(--k-bg, var(--c-bg-sub)); color: var(--c-nav); font-size: var(--fs-sm); font-weight: 700; }
+  .tag .si { width: 16px; height: 16px; }
+  .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .note { margin: 0; font-size: var(--fs-sm); line-height: 1.6; color: var(--c-text-sub); }
+  /* 입력칸: 라벨, 칸, 도움말·오류(자리를 미리 잡아 둔다) */
+  .form { margin-top: 32px; display: grid; gap: 4px; }
+  .field label { display: block; margin-bottom: 8px; font-size: var(--fs-base); font-weight: 700; }
+  .ctrl { position: relative; }
+  .field input { width: 100%; height: 52px; padding: 0 16px; border: 1px solid var(--c-border); border-radius: 8px; background: var(--c-white); font: inherit; font-size: var(--fs-md); color: var(--c-main); transition: border-color .2s; }
+  .field input::placeholder { color: var(--c-text-disabled); }
+  .field input:focus { border-color: var(--c-point); outline: 2px solid var(--c-point-light); outline-offset: 0; }
+  .field input[aria-invalid="true"] { border-color: var(--c-sale); }
+  .field .help { min-height: 1lh; margin: 6px 0 12px; font-size: var(--fs-sm); line-height: 1.5; color: var(--c-text-sub); }
+  .field .help.err { color: var(--c-sale); }
+  .field .help.ok { color: var(--c-safe); }
+  .peek { position: absolute; right: 4px; top: 4px; width: 44px; height: 44px; border: 0; border-radius: 8px; background: none; color: var(--c-text-sub); cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .peek:hover, .peek[aria-pressed="true"] { color: var(--c-point); }
+  .form-msg { min-height: 1lh; margin: 4px 0 8px; padding: 0; font-size: var(--fs-sm); font-weight: 700; color: var(--c-nav); }
+  .form-msg.on { padding: 12px 14px; border-radius: 8px; background: var(--c-bg-sub); }
+  .form-links { margin-top: 16px; display: flex; justify-content: center; gap: 0; font-size: var(--fs-sm); color: var(--c-text-sub); }
+  .form-links a { padding: 0 12px; }
+  .form-links a + a { box-shadow: inset 1px 0 0 var(--c-border); }
+  .form-links a:hover { color: var(--c-point); }
+  /* 데모 계정 */
+  .demo { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--c-border); }
+  .demo h2 { margin: 0; font-size: var(--fs-lg); letter-spacing: -0.02em; }
+  .demo .note { margin: 6px 0 16px; }
+  .personas { display: grid; gap: 10px; }
+  /* 로그인 칸: 라벨은 칸 안 안내 글자로, 두 칸을 바짝 붙이고 오류가 있을 때만 아래에 안내 */
+  .tight { gap: 8px; }
+  .tight .field .help { min-height: 0; margin: 6px 0 0; }
+  .tight .field .help:empty, .tight .form-msg:empty { display: none; }
+  .tight .form-msg { margin: 0; }
+  .tight .b-wide { margin-top: 8px; }
+  .persona { padding: 16px 18px; border: 1px solid var(--c-border); border-radius: var(--r-md); display: grid; gap: 8px; transition: border-color .2s, background-color .2s; }
+  .persona:hover { border-color: var(--tc); background: color-mix(in srgb, var(--tc) 8%, var(--c-white)); }
+  .p-hd { display: flex; align-items: center; gap: 8px; font-size: var(--fs-md); }
+  .p-hd .tone-sw { width: 14px; height: 14px; border-radius: 4px; background: var(--tc); }
+  .p-hd .mock { color: var(--c-text-sub); font-size: var(--fs-base); }
+  .p-row { display: grid; grid-template-columns: 80px minmax(0, 1fr); align-items: center; gap: 8px; font-size: var(--fs-sm); }
+  .p-k { color: var(--c-text-sub); }
+  /* 플로팅 퀵메뉴 (2안과 동일) */
+  .float { position: fixed; right: 24px; bottom: 32px; z-index: 30; display: grid; gap: 8px; }
+  .float a, .float button { width: 56px; height: 56px; border: 0; border-radius: 50%; background: var(--c-white); box-shadow: var(--shadow-float); color: var(--c-main); font: inherit; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; transition: color .2s, transform .2s var(--ease); }
+  .float a:hover, .float button:hover { color: var(--c-point); transform: translateY(-2px); }
+  .float .ico { width: 18px; height: 18px; }
+  .float .go { background: var(--c-point); color: var(--c-white); }
+  .float .go:hover { color: var(--c-white); background: var(--c-point-dark); }
+  .float .cart { position: relative; }
+  .float .cnt { position: absolute; top: -2px; right: -2px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 10px; background: var(--c-sale); color: var(--c-white); font-size: 11px; font-weight: 800; display: flex; align-items: center; justify-content: center; }
+  .float [hidden] { display: none; }
+
+  .soon.show { animation: soon 2s ease-out forwards; }
+  @media (max-width: 1100px) {
+    .hd-nav { gap: 22px; font-size: var(--fs-md); }
+    .hd-cta { display: none; }
+  }
+  @media (max-width: 800px) {
+    .hd > .container { height: 60px; grid-template-columns: minmax(0, 1fr) auto; }
+    .hd-nav { display: none; }
+    .hd .logo { height: 26px; font-size: 20px; }
+    .sf .container { padding-top: 12px; padding-bottom: 32px; }
+    .sf-form input { height: 56px; font-size: 21px; }
+    .topbar nav { display: none; }
+    .page-hd { padding-top: 24px; }
+    .page-hd h1 { font-size: 26px; }
+    .float { right: 12px; bottom: 16px; }
+    .float a:not(.go), .float button { display: none; }
+    body { padding-bottom: 88px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .drawer .panel { animation: none; }
+    .hd-nav a, .hd-cta, .sf, .hd.sf-on .sf, .js .sf-stg, .js .hd.sf-on .sf-stg, .sf-scrim, .sf-scrim.on, .b { transition: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="container">
+    <nav aria-label="회원 메뉴"><a href="persongal_login.html" aria-current="page">로그인</a><a href="persongal_signup.html">회원가입</a><a href="#menu-soon">고객센터</a></nav>
+  </div>
+</div>
+<header class="hd">
+  <div class="container">
+    <div class="left">
+      <button type="button" class="ib" id="menuBtn" aria-label="전체 메뉴 열기" aria-expanded="false" aria-controls="drawer"><svg class="ico" aria-hidden="true"><use href="#i-menu"/></svg></button>
+      <a href="persongal_home.html" class="logo">PERSONGAL</a>
+    </div>
+    <nav class="hd-nav" aria-label="주 메뉴">
+      <a href="#menu-soon">오특</a>
+      <a href="#menu-soon">랭킹</a>
+      <a href="persongal_personalcolor_2안.html">퍼스널컬러</a>
+      <a href="#menu-soon">튜토리얼</a>
+      <a href="#menu-soon">세일</a>
+      <a href="#menu-soon">이벤트</a>
+    </nav>
+    <div class="right">
+      <a class="hd-cta" href="persongal_recommend.html">맞춤 추천</a>
+      <button type="button" class="ib" id="searchBtn" aria-label="검색 열기" aria-expanded="false" aria-controls="sf"><svg class="ico" aria-hidden="true"><use href="#i-search"/></svg></button>
+      <a class="ib" href="persongal_orders.html" aria-label="구매내역"><svg class="ico" aria-hidden="true"><use href="#i-user"/></svg></a>
+      <a class="ib" href="persongal_cart.html" id="hdCart" aria-label="장바구니, 4개 담김"><svg class="ico" aria-hidden="true"><use href="#i-cart"/></svg><span class="hcnt" aria-hidden="true">4</span></a>
+    </div>
+  </div>
+  <div class="sf" id="sf">
+    <div class="container">
+      <form class="sf-form sf-stg" style="--i:0" action="#search-soon" role="search">
+        <svg class="ico" aria-hidden="true"><use href="#i-search"/></svg>
+        <input type="search" name="q" id="q" placeholder="올리브송 검색" aria-label="검색어" autocomplete="off">
+        <button type="button" class="ib" id="sfClear" aria-label="검색어 지우기" hidden><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button>
+      </form>
+      <h2 class="sf-k sf-stg" style="--i:1">빠른 링크</h2>
+      <ul class="sf-links" id="sfLinks">
+        <li class="sf-stg" style="--i:2"><a href="persongal_personalcolor_2안.html#diagnose"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>퍼스널컬러 사진 진단</a></li>
+        <li class="sf-stg" style="--i:3"><a href="persongal_personalcolor_2안.html#items"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>톤별 립·블러셔 컬러</a></li>
+        <li class="sf-stg" style="--i:4"><a href="persongal_recommend.html"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>성분 맞춤 추천</a></li>
+        <li class="sf-stg" style="--i:5"><a href="#menu-soon"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>오늘의 랭킹</a></li>
+        <li class="sf-stg" style="--i:6"><a href="#menu-soon"><svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg>메이크업 튜토리얼</a></li>
+      </ul>
+    </div>
+  </div>
+</header>
+<div class="sf-scrim" id="sfScrim" aria-hidden="true"></div>
+
+<div class="drawer" id="drawer" hidden>
+  <div class="scrim" data-close></div>
+  <div class="panel" role="dialog" aria-modal="true" aria-labelledby="drawer-t">
+    <div class="p-hd"><h2 id="drawer-t">전체 메뉴</h2><button type="button" class="ib" data-close aria-label="메뉴 닫기"><svg class="ico" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <nav aria-label="전체 메뉴">
+      <a href="#menu-soon">카테고리</a>
+      <a href="#menu-soon">오특</a>
+      <a href="#menu-soon">랭킹</a>
+      <a href="persongal_personalcolor_2안.html">퍼스널컬러</a>
+      <a href="#menu-soon">튜토리얼</a>
+      <a href="persongal_recommend.html">맞춤 추천</a>
+      <a href="#menu-soon">테마관</a>
+      <a href="#menu-soon">기획전</a>
+      <a href="#menu-soon">세일</a>
+      <a href="#menu-soon">기프트카드</a>
+      <a href="#menu-soon">멤버십/쿠폰</a>
+      <a href="#menu-soon">이벤트</a>
+    </nav>
+    <div class="sub"><a href="#menu-soon">올송매장찾기</a><a href="#menu-soon">최근 본 상품</a><a href="persongal_login.html">로그인</a><a href="#menu-soon">고객센터</a></div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-cam" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+  <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 10.5h10.6L20.5 7H6.6"/><circle cx="9.5" cy="19" r="1.5"/><circle cx="17" cy="19" r="1.5"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5 20 20"/></symbol>
+  <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8.5" r="3.5"/><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-top" viewBox="0 0 24 24"><path d="M6 14l6-6 6 6"/></symbol>
+  <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0 1 12 7.3a4.3 4.3 0 0 1 7.5 2.5C19.5 15.4 12 20 12 20z"/></symbol>
+  <symbol id="s-danger" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M12 6.8v6.4" fill="none" stroke-width="2.6" stroke-linecap="round" style="stroke:var(--c-white)"/><circle cx="12" cy="17.2" r="1.5" style="fill:var(--c-white)"/></symbol>
+  <symbol id="s-ok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.4l3.4 3.4L17.2 9" fill="none" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" style="stroke:var(--c-white)"/></symbol>
+  <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+</svg>
+
+<main id="main" class="container narrow">
+  <div class="page-hd">
+    <h1>로그인</h1>
+    <p class="lead">내 퍼스널컬러와 피부 기록으로 맞춤 추천을 받으려면 로그인해 주세요.</p>
+  </div>
+
+  <!-- data-endpoint: [연동 예정] 로그인 API 주소. 비어 있으면 요청을 보내지 않는다 -->
+  <form class="form tight" id="loginForm" novalidate data-endpoint="">
+    <div class="field">
+      <label for="lgId" class="sr-only">아이디(이메일)</label>
+      <input type="email" id="lgId" name="email" autocomplete="username" placeholder="아이디(이메일)" aria-describedby="lgIdHelp">
+      <p class="help" id="lgIdHelp" data-base=""></p>
+    </div>
+    <div class="field">
+      <label for="lgPw" class="sr-only">비밀번호</label>
+      <div class="ctrl"><input type="password" id="lgPw" name="password" autocomplete="current-password" placeholder="비밀번호" aria-describedby="lgPwHelp"><button type="button" class="peek" aria-pressed="false" aria-label="비밀번호 보기" data-peek="lgPw"><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg></button></div>
+      <p class="help" id="lgPwHelp" data-base=""></p>
+    </div>
+    <p class="form-msg" id="lgMsg" role="status"></p>
+    <button type="submit" class="b b-fill b-wide">로그인</button>
+    <div class="form-links"><a href="persongal_signup.html">회원가입</a><a href="#menu-soon">아이디·비밀번호 찾기</a></div>
+  </form>
+
+  <section class="demo" aria-labelledby="demo-t">
+    <h2 id="demo-t">데모 계정으로 둘러보기</h2>
+    <p class="note">예선 시연용 계정이에요. 고르면 그 사람의 톤과 피부 기록으로 화면을 볼 수 있어요.</p>
+    <div class="personas">
+      <a class="persona" href="persongal_home.html" data-persona="a" style="--tc:var(--tone-summer)">
+        <span class="p-hd"><i class="tone-sw" role="img" aria-label="여름쿨 색"></i><b>데모 A</b><span class="mock">여름쿨</span></span>
+        <span class="p-row"><span class="p-k">피할 성분</span><span class="tags"><span class="tag k-mine">리모넨</span><span class="tag k-mine">시트로넬올</span></span></span>
+        <span class="p-row"><span class="p-k">구매한 제품</span><span class="mock">6개</span></span>
+      </a>
+      <a class="persona" href="persongal_home.html" data-persona="b" style="--tc:var(--tone-spring)">
+        <span class="p-hd"><i class="tone-sw" role="img" aria-label="봄웜 색"></i><b>데모 B</b><span class="mock">봄웜</span></span>
+        <span class="p-row"><span class="p-k">피할 성분</span><span class="tags"><span class="tag k-mine">향료</span></span></span>
+        <span class="p-row"><span class="p-k">구매한 제품</span><span class="mock">4개</span></span>
+      </a>
+      <a class="persona" href="persongal_home.html" data-persona="c" style="--tc:var(--tone-winter)">
+        <span class="p-hd"><i class="tone-sw" role="img" aria-label="겨울쿨 색"></i><b>데모 C</b><span class="mock">겨울쿨</span></span>
+        <span class="p-row"><span class="p-k">피할 성분</span><span class="tags"><span class="note">아직 없어요</span></span></span>
+        <span class="p-row"><span class="p-k">구매한 제품</span><span class="mock">2개</span></span>
+      </a>
+    </div>
+  </section>
+</main>
+
+<div class="float" aria-label="빠른 메뉴">
+  <a class="go" href="persongal_personalcolor_2안.html#diagnose"><svg class="ico" aria-hidden="true"><use href="#i-cam"/></svg>진단</a>
+  <a class="cart" href="persongal_cart.html" id="floatCart" aria-label="장바구니, 4개 담김"><svg class="ico" aria-hidden="true"><use href="#i-cart"/></svg>장바구니<span class="cnt" aria-hidden="true">4</span></a>
+  <button type="button" id="toTop"><svg class="ico" aria-hidden="true"><use href="#i-top"/></svg>TOP</button>
+</div>
+
+<footer class="footer">
+  <div class="container">OLIVE SONG<br />건강한 아름다움을 위한 오늘의 쇼핑<br />고객센터 1544-0000, 평일 09:00 - 18:00</div>
+</footer>
+
+<div class="soon" id="detail-soon" role="status">상세 페이지는 준비 중이에요</div>
+<div class="soon" id="menu-soon" role="status">준비 중인 메뉴예요</div>
+<div class="soon" id="search-soon" role="status">검색 결과 페이지는 준비 중이에요</div>
+<div class="soon" id="toast" role="status"></div>
+<script>
+document.documentElement.classList.add('js');
+var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+var $ = function (id) { return document.getElementById(id); };
+var esc = function (t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+$('toTop').addEventListener('click', function () { window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); });
+
+// 비밀번호 보기
+document.querySelectorAll('[data-peek]').forEach(function (b) {
+  b.addEventListener('click', function () {
+    var i = $(b.dataset.peek), on = i.type === 'password';
+    i.type = on ? 'text' : 'password';
+    b.setAttribute('aria-pressed', on);
+    b.setAttribute('aria-label', on ? '비밀번호 숨기기' : '비밀번호 보기');
+  });
+});
+// 입력칸 아래 도움말 자리에 오류·확인 문구를 쓴다
+function say(id, msg, kind) {
+  var help = $(id + 'Help');
+  help.textContent = msg || help.dataset.base || '';
+  help.className = 'help' + (kind ? ' ' + kind : '');
+  $(id).setAttribute('aria-invalid', kind === 'err');
+}
+// 로그인: 칸을 확인하고, 서버가 연결되기 전에는 보내지 않는다
+$('loginForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  var id = $('lgId').value.trim(), pw = $('lgPw').value, ok = true;
+  if (!id) { say('lgId', '아이디를 입력해 주세요.', 'err'); ok = false; }
+  else if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(id)) { say('lgId', '이메일 형식으로 입력해 주세요.', 'err'); ok = false; }
+  else say('lgId');
+  if (!pw) { say('lgPw', '비밀번호를 입력해 주세요.', 'err'); ok = false; } else say('lgPw');
+  var msg = $('lgMsg');
+  if (!ok) { msg.textContent = ''; msg.classList.remove('on'); ($('lgId').getAttribute('aria-invalid') === 'true' ? $('lgId') : $('lgPw')).focus(); return; }
+  if (!this.dataset.endpoint) { msg.textContent = '서버 연동 전이라 로그인할 수 없어요. 아래 데모 계정으로 둘러보세요.'; msg.classList.add('on'); }
+});
+// 데모 계정: [연동 예정] 고른 계정을 저장해 다른 페이지가 그 사람 데이터로 보이게 한다
+
+// 헤더: 검색 펼치기, 전체 메뉴 서랍 (2안과 동일)
+var hd = document.querySelector('.hd');
+document.querySelectorAll('.hd-nav a').forEach(function (a, i) { a.style.setProperty('--n', i); });
+function setSearch(open, back) {
+  if (hd.classList.contains('sf-on') === open) return;
+  hd.classList.toggle('sf-on', open);
+  $('sfScrim').classList.toggle('on', open);
+  $('searchBtn').setAttribute('aria-expanded', open);
+  $('searchBtn').setAttribute('aria-label', open ? '검색 닫기' : '검색 열기');
+  $('searchBtn').querySelector('use').setAttribute('href', open ? '#i-x' : '#i-search');
+  document.body.style.overflow = open ? 'hidden' : '';
+  if (open) $('q').focus();
+  else if (back) $('searchBtn').focus();
+}
+$('searchBtn').addEventListener('click', function () { setSearch(!hd.classList.contains('sf-on')); });
+$('sfScrim').addEventListener('click', function () { setSearch(false); });
+$('sfLinks').addEventListener('click', function (e) { if (e.target.closest('a')) setSearch(false); });
+hd.addEventListener('focusout', function (e) { if (e.relatedTarget && !hd.contains(e.relatedTarget)) setSearch(false); });
+$('q').addEventListener('input', function () { $('sfClear').hidden = !this.value; });
+$('sfClear').addEventListener('click', function () { $('q').value = ''; this.hidden = true; $('q').focus(); });
+function closeDrawer() {
+  $('drawer').hidden = true; document.body.style.overflow = '';
+  $('menuBtn').setAttribute('aria-expanded', 'false'); $('menuBtn').focus();
+}
+$('menuBtn').addEventListener('click', function () {
+  setSearch(false);
+  $('drawer').hidden = false; document.body.style.overflow = 'hidden';
+  this.setAttribute('aria-expanded', 'true');
+  $('drawer').querySelector('[data-close].ib').focus();
+});
+$('drawer').addEventListener('click', function (e) { if (e.target.closest('[data-close]')) closeDrawer(); });
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && !$('drawer').hidden) closeDrawer();
+  else if (e.key === 'Escape' && hd.classList.contains('sf-on')) setSearch(false, true);
+  if (e.key === 'Tab' && !$('drawer').hidden) {
+    var f = $('drawer').querySelectorAll('a, button'), first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+});
+</script>
+</body>
+</html>
