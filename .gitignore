@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# 디자인 스킬 (개인 작업 도구)
+.agents/
+.claude/
+skills-lock.json
+.hallmark/
+.impeccable/
+.taste-skill/
+site/PRODUCT.md
+
+# 흑백 화면 흐름 스케치 (기획 확인용)
+sketch/
