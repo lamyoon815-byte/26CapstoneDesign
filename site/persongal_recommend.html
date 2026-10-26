@@ -10,7 +10,7 @@
 <meta name="author" content="인공지능공학부 2511798 김규린">
 <title>맞춤 추천 | PERSONGAL</title>
 <meta name="description" content="내 퍼스널컬러와 리뷰로 찾은 의심 성분을 반영해, 맞는 제품만 추천하고 뺀 제품의 이유까지 보여주는 페이지">
-<link rel="stylesheet" href="9_올리브송_common.css">
+<link rel="stylesheet" href="persongal_common.css">
 <style>
   :root {
     --w-container: 1020px;
@@ -705,6 +705,7 @@
 <div class="soon" id="menu-soon" role="status">준비 중인 메뉴예요</div>
 <div class="soon" id="search-soon" role="status">검색 결과 페이지는 준비 중이에요</div>
 <div class="soon" id="toast" role="status"></div>
+<script src="api.js"></script>
 <script>
 document.documentElement.classList.add('js');
 var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;

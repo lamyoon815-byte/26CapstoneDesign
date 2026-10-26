@@ -9,7 +9,7 @@
 <meta name="author" content="인공지능공학부 2511798 김규린">
 <title>PERSONGAL | 내 톤과 피부에 맞는 것만</title>
 <meta name="description" content="사진 한 장으로 퍼스널컬러를 진단하고, 내 리뷰로 찾은 의심 성분은 걸러낸 제품을 추천하는 뷰티 쇼핑몰">
-<link rel="stylesheet" href="9_올리브송_common.css">
+<link rel="stylesheet" href="persongal_common.css">
 <style>
   :root {
     --w-container: 1020px;
@@ -432,6 +432,7 @@
 <div class="soon" id="toast" role="status"></div>
 <noscript><p class="container">추천 제품 목록은 자바스크립트를 켜야 볼 수 있어요.</p></noscript>
 
+<script src="api.js"></script>
 <script>
 document.documentElement.classList.add('js');
 var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;

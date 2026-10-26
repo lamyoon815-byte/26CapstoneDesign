@@ -1,0 +1,174 @@
+@charset "UTF-8";
+/* PERSONGAL 공통 스타일: 색·글자 크기 토큰, 기본 요소, 본문 폭, 푸터, 안내 메시지, 로딩·실패·빈 목록 상태.
+   페이지별 스타일은 각 HTML 파일의 <style>에 둔다. (공동 작성: 2511798 김규린, 2514489 김민서, 2511329 이예랑) */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css");
+
+:root {
+  --c-main: #111111;
+  --c-nav: #343a40;
+  --c-point: #1e4fb3;
+  --c-point-dark: #173a86;
+  --c-point-light: #e8efff;
+  --c-sale: #bd3838;
+  --c-bg-sub: #f7f8fa;
+  --c-text-sub: #65718b;
+  --c-text-disabled: #9aa4b2;
+  --c-border: #cbd8f5;
+  --c-white: #ffffff;
+
+  --c-safe: #237847;
+  --c-caution: #f4bd45;
+  --c-danger: #e47461;
+
+  --fs-xl: 24px;
+  --fs-lg: 20px;
+  --fs-md: 16px;
+  --fs-base: 14px;
+  --fs-sm: 14px;
+
+  --w-container: 1200px;
+  --font: "Pretendard", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  font-size: var(--fs-base);
+  color: var(--c-main);
+  background: var(--c-white);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.container {
+  width: var(--w-container);
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  font-weight: 800;
+  color: var(--c-point);
+}
+
+.footer {
+  margin-top: 64px;
+  padding: 28px 0;
+  border-top: 1px solid var(--c-border);
+  color: var(--c-text-sub);
+  font-size: var(--fs-md);
+  line-height: 1.8;
+}
+
+/* 잠깐 떴다 사라지는 안내 메시지 (#menu-soon 같은 링크 대상, 또는 스크립트가 .show를 붙임) */
+.soon {
+  position: fixed;
+  left: 50%;
+  bottom: 40px;
+  z-index: 100;
+  transform: translateX(-50%);
+  padding: 12px 24px;
+  border-radius: 24px;
+  background: var(--c-main);
+  color: var(--c-white);
+  font-size: var(--fs-base);
+  opacity: 0;
+  pointer-events: none;
+}
+.soon:target {
+  animation: soon 2s ease-out forwards;
+}
+@keyframes soon {
+  0%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* 서버 데이터 상태: 목록이 들어갈 자리에 api.js가 넣는다 (로딩 중 / 불러오지 못함 / 비어 있음) */
+.state {
+  padding: 48px 16px;
+  text-align: center;
+  font-size: var(--fs-base);
+  color: var(--c-text-sub);
+}
+.state[hidden] {
+  display: none;
+}
+.state.err {
+  color: var(--c-sale);
+}
+.state .retry {
+  margin-top: 12px;
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--c-border);
+  border-radius: 6px;
+  background: var(--c-white);
+  font-size: var(--fs-sm);
+  font-weight: 700;
+  color: var(--c-nav);
+}
+.state .retry:hover {
+  border-color: var(--c-point);
+  color: var(--c-point);
+}
+.state.load::before {
+  content: "";
+  display: block;
+  width: 24px;
+  height: 24px;
+  margin: 0 auto 12px;
+  border: 3px solid var(--c-point-light);
+  border-top-color: var(--c-point);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .soon:target {
+    animation: none;
+    opacity: 1;
+  }
+  .state.load::before {
+    animation: none;
+  }
+}

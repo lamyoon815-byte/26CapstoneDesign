@@ -1,13 +1,13 @@
 <!DOCTYPE html>
-<!-- 로그인: 아이디·비밀번호 로그인(서버 연동 전) + 예선 시연용 데모 계정 3명. 데모 계정 내용은 목데이터, 고른 계정을 다른 페이지에 반영하는 것은 [연동 예정] -->
+<!-- 로그인: 아이디·비밀번호로 로컬 서버에 로그인 (api.js의 login). 성공하면 홈으로 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="author" content="인공지능공학부 2511798 김규린">
 <title>로그인 | PERSONGAL</title>
-<meta name="description" content="PERSONGAL 로그인. 예선 시연용 데모 계정으로 둘러볼 수도 있어요.">
-<link rel="stylesheet" href="9_올리브송_common.css">
+<meta name="description" content="PERSONGAL 로그인. 내 퍼스널컬러와 피부 기록으로 맞춤 추천을 받아요.">
+<link rel="stylesheet" href="persongal_common.css">
 <style>
   :root {
     --w-container: 1020px;
@@ -151,25 +151,13 @@
   .form-links { margin-top: 16px; display: flex; justify-content: center; gap: 0; font-size: var(--fs-sm); color: var(--c-text-sub); }
   .form-links a { padding: 0 12px; }
   .form-links a + a { box-shadow: inset 1px 0 0 var(--c-border); }
-  .form-links a:hover { color: var(--c-point); }
-  /* 데모 계정 */
-  .demo { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--c-border); }
-  .demo h2 { margin: 0; font-size: var(--fs-lg); letter-spacing: -0.02em; }
-  .demo .note { margin: 6px 0 16px; }
-  .personas { display: grid; gap: 10px; }
   /* 로그인 칸: 라벨은 칸 안 안내 글자로, 두 칸을 바짝 붙이고 오류가 있을 때만 아래에 안내 */
   .tight { gap: 8px; }
   .tight .field .help { min-height: 0; margin: 6px 0 0; }
   .tight .field .help:empty, .tight .form-msg:empty { display: none; }
   .tight .form-msg { margin: 0; }
   .tight .b-wide { margin-top: 8px; }
-  .persona { padding: 16px 18px; border: 1px solid var(--c-border); border-radius: var(--r-md); display: grid; gap: 8px; transition: border-color .2s, background-color .2s; }
-  .persona:hover { border-color: var(--tc); background: color-mix(in srgb, var(--tc) 8%, var(--c-white)); }
-  .p-hd { display: flex; align-items: center; gap: 8px; font-size: var(--fs-md); }
-  .p-hd .tone-sw { width: 14px; height: 14px; border-radius: 4px; background: var(--tc); }
-  .p-hd .mock { color: var(--c-text-sub); font-size: var(--fs-base); }
-  .p-row { display: grid; grid-template-columns: 80px minmax(0, 1fr); align-items: center; gap: 8px; font-size: var(--fs-sm); }
-  .p-k { color: var(--c-text-sub); }
+  .form-links a:hover { color: var(--c-point); }
   /* 플로팅 퀵메뉴 (2안과 동일) */
   .float { position: fixed; right: 24px; bottom: 32px; z-index: 30; display: grid; gap: 8px; }
   .float a, .float button { width: 56px; height: 56px; border: 0; border-radius: 50%; background: var(--c-white); box-shadow: var(--shadow-float); color: var(--c-main); font: inherit; font-size: 11px; font-weight: 700; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; transition: color .2s, transform .2s var(--ease); }
@@ -299,8 +287,7 @@
     <p class="lead">내 퍼스널컬러와 피부 기록으로 맞춤 추천을 받으려면 로그인해 주세요.</p>
   </div>
 
-  <!-- data-endpoint: [연동 예정] 로그인 API 주소. 비어 있으면 요청을 보내지 않는다 -->
-  <form class="form tight" id="loginForm" novalidate data-endpoint="">
+  <form class="form tight" id="loginForm" novalidate>
     <div class="field">
       <label for="lgId" class="sr-only">아이디(이메일)</label>
       <input type="email" id="lgId" name="email" autocomplete="username" placeholder="아이디(이메일)" aria-describedby="lgIdHelp">
@@ -316,27 +303,6 @@
     <div class="form-links"><a href="persongal_signup.html">회원가입</a><a href="#menu-soon">아이디·비밀번호 찾기</a></div>
   </form>
 
-  <section class="demo" aria-labelledby="demo-t">
-    <h2 id="demo-t">데모 계정으로 둘러보기</h2>
-    <p class="note">예선 시연용 계정이에요. 고르면 그 사람의 톤과 피부 기록으로 화면을 볼 수 있어요.</p>
-    <div class="personas">
-      <a class="persona" href="persongal_home.html" data-persona="a" style="--tc:var(--tone-summer)">
-        <span class="p-hd"><i class="tone-sw" role="img" aria-label="여름쿨 색"></i><b>데모 A</b><span class="mock">여름쿨</span></span>
-        <span class="p-row"><span class="p-k">피할 성분</span><span class="tags"><span class="tag k-mine">리모넨</span><span class="tag k-mine">시트로넬올</span></span></span>
-        <span class="p-row"><span class="p-k">구매한 제품</span><span class="mock">6개</span></span>
-      </a>
-      <a class="persona" href="persongal_home.html" data-persona="b" style="--tc:var(--tone-spring)">
-        <span class="p-hd"><i class="tone-sw" role="img" aria-label="봄웜 색"></i><b>데모 B</b><span class="mock">봄웜</span></span>
-        <span class="p-row"><span class="p-k">피할 성분</span><span class="tags"><span class="tag k-mine">향료</span></span></span>
-        <span class="p-row"><span class="p-k">구매한 제품</span><span class="mock">4개</span></span>
-      </a>
-      <a class="persona" href="persongal_home.html" data-persona="c" style="--tc:var(--tone-winter)">
-        <span class="p-hd"><i class="tone-sw" role="img" aria-label="겨울쿨 색"></i><b>데모 C</b><span class="mock">겨울쿨</span></span>
-        <span class="p-row"><span class="p-k">피할 성분</span><span class="tags"><span class="note">아직 없어요</span></span></span>
-        <span class="p-row"><span class="p-k">구매한 제품</span><span class="mock">2개</span></span>
-      </a>
-    </div>
-  </section>
 </main>
 
 <div class="float" aria-label="빠른 메뉴">
@@ -353,6 +319,7 @@
 <div class="soon" id="menu-soon" role="status">준비 중인 메뉴예요</div>
 <div class="soon" id="search-soon" role="status">검색 결과 페이지는 준비 중이에요</div>
 <div class="soon" id="toast" role="status"></div>
+<script src="api.js"></script>
 <script>
 document.documentElement.classList.add('js');
 var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -376,7 +343,15 @@ function say(id, msg, kind) {
   help.className = 'help' + (kind ? ' ' + kind : '');
   $(id).setAttribute('aria-invalid', kind === 'err');
 }
-// 로그인: 칸을 확인하고, 서버가 연결되기 전에는 보내지 않는다
+// 서버로 보내는 동안 버튼을 막고, 실패하면 이유를, 성공하면 다음 화면으로
+function send(form, msg, req, next) {
+  var btn = form.querySelector('[type="submit"]');
+  btn.disabled = true; msg.textContent = ''; msg.classList.remove('on');
+  req.then(function () { location.href = next; }, function (err) {
+    msg.textContent = err.message; msg.classList.add('on'); btn.disabled = false;
+  });
+}
+// 로그인: 칸을 확인하고 서버로 보낸다
 $('loginForm').addEventListener('submit', function (e) {
   e.preventDefault();
   var id = $('lgId').value.trim(), pw = $('lgPw').value, ok = true;
@@ -386,9 +361,8 @@ $('loginForm').addEventListener('submit', function (e) {
   if (!pw) { say('lgPw', '비밀번호를 입력해 주세요.', 'err'); ok = false; } else say('lgPw');
   var msg = $('lgMsg');
   if (!ok) { msg.textContent = ''; msg.classList.remove('on'); ($('lgId').getAttribute('aria-invalid') === 'true' ? $('lgId') : $('lgPw')).focus(); return; }
-  if (!this.dataset.endpoint) { msg.textContent = '서버 연동 전이라 로그인할 수 없어요. 아래 데모 계정으로 둘러보세요.'; msg.classList.add('on'); }
+  send(this, msg, API.post('login', { email: id, password: pw }), 'persongal_home.html');
 });
-// 데모 계정: [연동 예정] 고른 계정을 저장해 다른 페이지가 그 사람 데이터로 보이게 한다
 
 // 헤더: 검색 펼치기, 전체 메뉴 서랍 (2안과 동일)
 var hd = document.querySelector('.hd');

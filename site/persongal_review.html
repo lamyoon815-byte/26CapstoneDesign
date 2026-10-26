@@ -7,7 +7,7 @@
 <meta name="author" content="인공지능공학부 2511798 김규린">
 <title>리뷰 쓰기 | PERSONGAL</title>
 <meta name="description" content="써본 제품이 내 피부에 맞았는지 남겨요. 안 맞았던 제품의 성분은 의심 성분을 찾는 데 쓰여요.">
-<link rel="stylesheet" href="9_올리브송_common.css">
+<link rel="stylesheet" href="persongal_common.css">
 <style>
   :root {
     --w-container: 1020px;
@@ -310,8 +310,7 @@
 
   <div class="rprod" id="rprod"></div>
 
-  <!-- data-endpoint: [연동 예정] 리뷰 저장 API 주소. 비어 있으면 요청을 보내지 않는다 -->
-  <form id="rvForm" novalidate data-endpoint="">
+  <form id="rvForm" novalidate>
     <fieldset class="q">
       <legend>이 제품, 내 피부에 맞았나요?</legend>
       <div class="opts">
@@ -347,6 +346,7 @@
 <div class="soon" id="menu-soon" role="status">준비 중인 메뉴예요</div>
 <div class="soon" id="search-soon" role="status">검색 결과 페이지는 준비 중이에요</div>
 <div class="soon" id="toast" role="status"></div>
+<script src="api.js"></script>
 <script>
 document.documentElement.classList.add('js');
 var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -362,11 +362,19 @@ $('rprod').innerHTML = '<img src="' + esc(o[1]) + '" alt="" width="72" height="7
 // 이미 남긴 리뷰가 있으면 골라 둔다 (리뷰 수정)
 if (o[5]) document.querySelector('input[name="fit"][value="' + o[5] + '"]').checked = true;
 document.querySelectorAll('input[name="fit"]').forEach(function (r) { r.addEventListener('change', function () { $('fitHelp').textContent = ''; }); });
+// 서버로 보내는 동안 버튼을 막고, 실패하면 이유를, 성공하면 다음 화면으로
+function send(form, msg, req, next) {
+  var btn = form.querySelector('[type="submit"]');
+  btn.disabled = true; msg.textContent = ''; msg.classList.remove('on');
+  req.then(function () { location.href = next; }, function (err) {
+    msg.textContent = err.message; msg.classList.add('on'); btn.disabled = false;
+  });
+}
 $('rvForm').addEventListener('submit', function (e) {
   e.preventDefault();
   var pick = document.querySelector('input[name="fit"]:checked'), msg = $('rvMsg');
   if (!pick) { $('fitHelp').textContent = '잘 맞았는지 골라 주세요.'; document.querySelector('input[name="fit"]').focus(); return; }
-  if (!this.dataset.endpoint) { msg.textContent = '서버 연동 전이라 리뷰는 저장되지 않아요.'; msg.classList.add('on'); }
+  send(this, msg, API.post('review', { fit: pick.value }, { id: o[0] }), 'persongal_orders.html');
 });
 
 // 헤더: 검색 펼치기, 전체 메뉴 서랍 (2안과 동일)

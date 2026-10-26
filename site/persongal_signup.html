@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<!-- 회원가입: 입력 검증 화면. 가입 요청은 서버 연동 전이라 보내지 않는다 (data-endpoint 비어 있음) -->
+<!-- 회원가입: 입력 검증 후 로컬 서버로 가입 요청 (api.js의 signup). 성공하면 로그인 화면으로 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
@@ -7,7 +7,7 @@
 <meta name="author" content="인공지능공학부 2511798 김규린">
 <title>회원가입 | PERSONGAL</title>
 <meta name="description" content="PERSONGAL 회원가입. 이메일, 비밀번호, 이름과 약관 동의를 입력해요.">
-<link rel="stylesheet" href="9_올리브송_common.css">
+<link rel="stylesheet" href="persongal_common.css">
 <style>
   :root {
     --w-container: 1020px;
@@ -291,8 +291,7 @@
     <p class="lead">가입하면 진단한 퍼스널컬러와 리뷰 기록을 저장해 맞춤 추천을 받을 수 있어요.</p>
   </div>
 
-  <!-- data-endpoint: [연동 예정] 가입 API 주소. 비어 있으면 요청을 보내지 않는다 -->
-  <form class="form" id="suForm" novalidate data-endpoint="">
+  <form class="form" id="suForm" novalidate>
     <div class="field">
       <label for="suEmail">이메일</label>
       <input type="email" id="suEmail" name="suEmail" autocomplete="email" aria-describedby="suEmailHelp">
@@ -341,6 +340,7 @@
 <div class="soon" id="menu-soon" role="status">준비 중인 메뉴예요</div>
 <div class="soon" id="search-soon" role="status">검색 결과 페이지는 준비 중이에요</div>
 <div class="soon" id="toast" role="status"></div>
+<script src="api.js"></script>
 <script>
 document.documentElement.classList.add('js');
 var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -386,6 +386,14 @@ Object.keys(RULES).forEach(function (id) {
 var ts = [].slice.call(document.querySelectorAll('.t'));
 $('tAll').addEventListener('change', function () { var on = this.checked; ts.forEach(function (t) { t.checked = on; }); $('termsHelp').textContent = ''; });
 ts.forEach(function (t) { t.addEventListener('change', function () { $('tAll').checked = ts.every(function (x) { return x.checked; }); }); });
+// 서버로 보내는 동안 버튼을 막고, 실패하면 이유를, 성공하면 다음 화면으로
+function send(form, msg, req, next) {
+  var btn = form.querySelector('[type="submit"]');
+  btn.disabled = true; msg.textContent = ''; msg.classList.remove('on');
+  req.then(function () { location.href = next; }, function (err) {
+    msg.textContent = err.message; msg.classList.add('on'); btn.disabled = false;
+  });
+}
 $('suForm').addEventListener('submit', function (e) {
   e.preventDefault();
   var bad = Object.keys(RULES).filter(function (id) { return !check(id); });
@@ -393,7 +401,7 @@ $('suForm').addEventListener('submit', function (e) {
   $('termsHelp').textContent = termsOk ? '' : '필수 약관에 동의해 주세요.';
   var msg = $('suMsg');
   if (bad.length || !termsOk) { msg.textContent = ''; msg.classList.remove('on'); (bad.length ? $(bad[0]) : $('tAll')).focus(); return; }
-  if (!this.dataset.endpoint) { msg.textContent = '서버 연동 전이라 가입 요청은 보내지지 않아요.'; msg.classList.add('on'); }
+  send(this, msg, API.post('signup', { email: $('suEmail').value.trim(), password: $('suPw').value, name: $('suName').value.trim(), marketing: ts[2].checked }), 'persongal_login.html');
 });
 
 // 헤더: 검색 펼치기, 전체 메뉴 서랍 (2안과 동일)

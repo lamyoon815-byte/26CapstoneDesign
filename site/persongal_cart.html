@@ -8,7 +8,7 @@
 <meta name="author" content="인공지능공학부 2511798 김규린">
 <title>장바구니 | 올리브송</title>
 <meta name="description" content="담은 상품과 결제 예정 금액을 확인하고, 내 피부 기록과 맞지 않는 성분이 든 상품을 주문 전에 걸러내는 장바구니">
-<link rel="stylesheet" href="9_올리브송_common.css">
+<link rel="stylesheet" href="persongal_common.css">
 <style>
   :root {
     /* 본문 폭: 양옆 여백을 두도록 올리브영 수준(1020px)으로 좁힌다 */
@@ -648,6 +648,7 @@
 <div class="soon" id="search-soon" role="status">검색 결과 페이지는 준비 중이에요</div>
 <div class="soon" id="toast" role="status"></div>
 
+<script src="api.js"></script>
 <script>
 document.documentElement.classList.add('js');
 var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
