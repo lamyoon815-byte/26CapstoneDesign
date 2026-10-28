@@ -196,6 +196,8 @@
   .tbd { color: var(--c-text-sub); font-weight: 700; }
   .res h2 b.tbd { color: var(--c-text-sub); }
   /* 안내가 없으면 접고, 있으면 글 양만큼만. 가장 높은 업로드 상태가 칸 높이를 정해서 배너 높이는 그대로 */
+  .wake { margin: 12px 0 0; font-size: var(--fs-sm); line-height: 1.5; color: var(--c-text-sub); }
+  .wake[hidden] { display: none; }
   .warn.off { display: none; }
   .warn { margin-top: 12px; padding: 12px 16px; border-radius: 10px; background: var(--c-warn-bg); font-size: var(--fs-sm); line-height: 1.5; }
   .warn strong { display: block; color: var(--c-sale); font-size: var(--fs-base); }
@@ -580,6 +582,7 @@
                 <li>조명 보정 <span class="st" id="s2">대기</span></li>
                 <li>퍼스널컬러 판별 <span class="st" id="s3">대기</span></li>
               </ol>
+              <p class="wake" id="wake" hidden>서버를 깨우는 중이에요. 처음에는 1분 정도 걸릴 수 있어요.</p>
             </div>
           </div>
         </div>
@@ -588,10 +591,10 @@
           <div class="res">
             <div>
               <h2 id="resT" tabindex="-1">나의 퍼스널컬러는 <b class="tbd">[연동 예정]</b></h2>
-              <div class="conf" id="conf">신뢰도 <span class="bar"><i id="confBar"></i></span><b id="confV" class="tbd">[연동 예정]</b></div>
+              <div class="conf" id="conf">신뢰도 <span class="bar"><i id="confBar"></i></span><b id="confV" class="tbd">-</b></div>
             </div>
             <div class="thumb" id="thumbB"></div>
-            <div class="warn off" id="warn"><strong>신뢰도가 낮아요. 다시 찍어주세요</strong><ul id="warnList"><li>[연동 예정: 미흡 항목별 재촬영 안내]</li></ul></div>
+            <div class="warn off" id="warn"><strong>신뢰도가 낮아요. 다시 찍어주세요</strong><ul id="warnList"></ul></div>
             <div class="acts">
               <button type="button" class="b b-line" id="retake"><svg class="ico" aria-hidden="true"><use href="#i-cam"/></svg>다시 진단하기</button>
             </div>
@@ -897,41 +900,52 @@ function run(file) {
     $('thumbB').replaceChildren(shot);
     var m;
     try { m = measure(img); } catch (e) { fail('사진을 분석하지 못했어요. 다른 사진으로 다시 시도해 주세요.'); return; }
+    if (file.size > 10 * 1024 * 1024) { fail('사진이 너무 커요. 10MB 이하로 올려주세요.'); return; }
     show('st-run');
-    var ids = ['s1', 's2', 's3'], names = ['사진 확인', '조명 보정', '퍼스널컬러 판별'], k = 0, gap = reduce ? 200 : 800;
     $('diagStatus').textContent = '분석을 시작했어요';
-    ids.forEach(function (id) { st(id, '대기'); });
-    (function tick() {
-      if (k > 0) { st(ids[k - 1], '완료', 'done', 'i-check'); $('diagStatus').textContent = names[k - 1] + ' 완료'; }
-      if (k < ids.length) { st(ids[k], '진행 중', 'on', 'i-load'); k++; setTimeout(tick, gap); }
-      else setTimeout(function () { result(m); }, gap / 2);
-    })();
+    $('wake').hidden = true;
+    st('s1', '완료', 'done', 'i-check');
+    st('s2', '진행 중', 'on', 'i-load');
+    st('s3', '대기');
+    // 조명 보정과 판별은 AI 서버가 한 번에 한다. 무료 서버가 쉬고 있으면 깨어나는 데 1분쯤 걸려 안내를 띄운다
+    var wake = setTimeout(function () { $('wake').hidden = false; }, 6000);
+    var fd = new FormData(); fd.append('file', file);
+    API.post('diagnose', fd).then(function (data) {
+      clearTimeout(wake);
+      st('s2', '완료', 'done', 'i-check'); st('s3', '완료', 'done', 'i-check');
+      $('diagStatus').textContent = '퍼스널컬러 판별 완료';
+      setTimeout(function () { result(m, data); }, reduce ? 0 : 400);
+    }, function (err) {
+      clearTimeout(wake);
+      fail('진단하지 못했어요. ' + err.message);
+    });
   };
   img.src = url;
 }
 
-function result(m) {
+// 서버의 confidence('low' | 'medium' | 'high')를 화면 표시로
+var CONF = { low: ['낮음', 0.34], medium: ['보통', 0.67], high: ['높음', 1] };
+
+function result(m, data) {
   // 촬영 환경 점검(밝기·색 치우침·해상도)은 브라우저에서 바로 확인해 재촬영 안내에 쓴다
   var bright = m.L > 0.32 && m.L < 0.85, neutral = m.cast < 0.16, sharp = m.w >= 600;
   var tips = [];
   if (!bright) tips.push(m.L <= 0.32 ? '조명이 어두워요. 창가나 밝은 곳에서 찍어주세요' : '빛이 너무 강해요. 직사광선을 피해주세요');
   if (!neutral) tips.push('색이 한쪽으로 치우쳤어요. 노란 실내등을 끄고 찍어주세요');
   if (!sharp) tips.push('사진이 작아요. 원본 크기로 올려주세요');
-  var low = tips.length > 0;
 
-  // [연동 예정] AI 진단 결과 { tone, confidence }가 들어올 자리
-  // 임시: 결과 화면 확인용으로 여름쿨 고정. 연동 시 아래 한 줄을 AI 응답으로 바꾼다
-  var diag = { tone: 'summer', confidence: low ? 48 : 87 };
-
-  // diag.tone은 'spring' | 'summer' | 'autumn' | 'winter' 중 하나로 받는다
-  var key = DATA[diag.tone] ? diag.tone : null;
-  $('resT').innerHTML = '나의 퍼스널컬러는 ' + (key ? '<b>' + DATA[key].name + '</b>' : '<b class="tbd">[연동 예정]</b>');
+  // AI 서버 응답: season('spring' | 'summer' | 'autumn' | 'winter'), season_ko, confidence
+  var key = DATA[data.season] ? data.season : null, c = CONF[data.confidence];
+  var low = tips.length > 0 || data.confidence === 'low';
+  if (data.confidence === 'low' && !tips.length) tips.push('AI가 톤을 확신하지 못했어요. 자연광 아래 맨얼굴로 다시 찍어보세요');
+  if (data.image_usability && data.image_usability !== 'usable' && data.image_issue) tips.push(data.image_issue);
+  $('resT').innerHTML = '나의 퍼스널컬러는 ' + (key ? '<b>' + DATA[key].name + '</b>' : '<b>' + esc(data.season_ko || '판별하지 못했어요') + '</b>');
   if (key) { state.mine = key; setTone(key); }
-  $('confV').textContent = diag.confidence != null ? diag.confidence + '%' : '[연동 예정]';
+  $('confV').textContent = c ? c[0] : (data.confidence || '-');
   $('conf').classList.toggle('low', low);
-  $('confBar').style.transform = 'scaleX(' + (diag.confidence != null ? diag.confidence / 100 : 0) + ')';
-  $('confV').classList.toggle('tbd', diag.confidence == null);
-  if (tips.length) $('warnList').innerHTML = tips.map(function (s) { return '<li>' + s + '</li>'; }).join('');
+  $('confBar').style.transform = 'scaleX(' + (c ? c[1] : 0) + ')';
+  $('confV').classList.remove('tbd');
+  $('warnList').innerHTML = tips.map(function (s) { return '<li>' + esc(s) + '</li>'; }).join('');
   $('warn').classList.toggle('off', !low);
   $('retake').classList.toggle('b-fill', low);
   $('retake').classList.toggle('b-line', !low);

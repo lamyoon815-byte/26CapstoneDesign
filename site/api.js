@@ -17,22 +17,26 @@ var API = (function () {
     recommend: '',      // 맞춤 추천 제품
     cart: '',           // 장바구니 목록·수량·삭제
     cartWarnings: '',   // 장바구니 성분 경고
-    diagnose: '',       // 퍼스널컬러 진단 (사진 업로드)
+    diagnose: 'https://personal-color-api-nqrx.onrender.com/predict', // 퍼스널컬러 진단 (AI 팀 서버, multipart 'file')
     toneProducts: '',   // 톤별 제품
     homeProducts: ''    // 홈: 내 퍼스널컬러·내 피부에 맞는 상품
   };
 
   function ready(name) { return !!PATHS[name]; }
 
+  // 다른 서버 주소(https://...)는 BASE를 붙이지 않는다
+  function external(name) { return /^https?:\/\//.test(PATHS[name]); }
+
   function url(name, params) {
-    return BASE + PATHS[name].replace(/\{(\w+)\}/g, function (_, k) { return encodeURIComponent(params && params[k] != null ? params[k] : ''); });
+    return (external(name) ? '' : BASE) + PATHS[name].replace(/\{(\w+)\}/g, function (_, k) { return encodeURIComponent(params && params[k] != null ? params[k] : ''); });
   }
 
   // 요청 하나. 실패하면 화면에 보여줄 문장을 담은 Error를 던진다
   function request(name, opt) {
     opt = opt || {};
     if (!ready(name)) return Promise.reject(new Error('아직 서버와 연결되지 않은 기능이에요.'));
-    var init = { method: opt.method || 'GET', credentials: 'include', headers: {} };
+    // 로그인 쿠키는 우리 서버에만 보낸다 (외부 서버는 쿠키 없이)
+    var init = { method: opt.method || 'GET', credentials: external(name) ? 'omit' : 'include', headers: {} };
     if (opt.body instanceof FormData) init.body = opt.body; // 사진 업로드는 FormData 그대로
     else if (opt.body != null) { init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(opt.body); }
     return fetch(url(name, opt.params), init).then(function (res) {
