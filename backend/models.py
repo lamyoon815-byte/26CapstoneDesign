@@ -94,3 +94,18 @@ class UserIngredientPreference(SQLModel, table=True):
     user_id: int = Field(foreign_key="users.id", primary_key=True)
     ingredient_id: int = Field(foreign_key="ingredients.id", primary_key=True)
     preference: str
+
+
+
+class CartItem(SQLModel, table=True):
+    __tablename__ = "cart_items"
+    __table_args__ = (
+        CheckConstraint(
+            "quantity >= 1 AND quantity <= 99",
+            name="ck_cart_item_quantity",
+        ),
+    )
+
+    user_id: int = Field(foreign_key="users.id", primary_key=True)
+    product_id: int = Field(foreign_key="products.id", primary_key=True)
+    quantity: int

@@ -129,3 +129,25 @@ class ProfileResponse(BaseModel):
     user: UserResponse
     avoid_ingredients: list[IngredientPreferenceResponse]
     preferred_ingredients: list[IngredientPreferenceResponse]
+
+
+
+class CartItemRequest(BaseModel):
+    quantity: int = Field(ge=1, le=99, strict=True)
+
+
+class CartItemResponse(BaseModel):
+    product_id: int
+    brand: str
+    name: str
+    image_url: str
+    unit_price: int
+    quantity: int
+    line_total: int
+
+
+class CartResponse(BaseModel):
+    items: list[CartItemResponse]
+    item_count: int
+    total_quantity: int
+    subtotal: int
