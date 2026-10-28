@@ -21,6 +21,7 @@ from fastapi.responses import JSONResponse
 from backend.routers.auth import router as auth_router
 from backend.routers.purchases import router as purchases_router
 from backend.routers.ingredients import router as ingredients_router
+from backend.routers.profile import router as profile_router
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -98,6 +99,7 @@ app.add_middleware(
 app.include_router(auth_router)
 app.include_router(purchases_router)
 app.include_router(ingredients_router)
+app.include_router(profile_router)
 
 
 @app.exception_handler(StarletteHTTPException)

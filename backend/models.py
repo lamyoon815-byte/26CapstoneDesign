@@ -79,3 +79,18 @@ class ProductIngredient(SQLModel, table=True):
 
     product_id: int = Field(foreign_key="products.id", primary_key=True)
     ingredient_id: int = Field(foreign_key="ingredients.id", primary_key=True)
+
+
+
+class UserIngredientPreference(SQLModel, table=True):
+    __tablename__ = "user_ingredient_preferences"
+    __table_args__ = (
+        CheckConstraint(
+            "preference IN ('avoid', 'prefer')",
+            name="ck_user_ingredient_preference",
+        ),
+    )
+
+    user_id: int = Field(foreign_key="users.id", primary_key=True)
+    ingredient_id: int = Field(foreign_key="ingredients.id", primary_key=True)
+    preference: str

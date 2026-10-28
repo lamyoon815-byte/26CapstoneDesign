@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
 from backend.db import engine
@@ -41,3 +41,23 @@ def get_product_ingredients(product_id: int):
 def get_my_suspects(user: User = Depends(get_current_user)):
     with Session(engine) as session:
         return analyze_suspects(session, user.id)
+
+
+
+@router.get("/api/ingredients")
+def search_ingredients(q: str = Query(default="", max_length=100)):
+    keyword = q.strip()
+    with Session(engine) as session:
+        statement = select(Ingredient)
+        if keyword:
+            statement = statement.where(
+                Ingredient.name.contains(keyword, autoescape=True)
+            )
+        rows = session.exec(statement.order_by(Ingredient.id).limit(50)).all()
+        return {
+            "items": [
+                {"id": i.id, "name": i.name, "is_sample": i.is_sample}
+                for i in rows
+            ],
+            "count": len(rows),
+        }

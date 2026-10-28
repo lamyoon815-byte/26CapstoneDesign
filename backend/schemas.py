@@ -110,3 +110,22 @@ class SuspectListResponse(BaseModel):
     missing_ingredient_product_ids: list[int]
     rule_version: str
     notice: str
+
+
+
+class IngredientPreferenceRequest(BaseModel):
+    preference: Literal["avoid", "prefer"]
+
+
+class IngredientPreferenceResponse(BaseModel):
+    ingredient_id: int
+    ingredient_name: str
+    preference: Literal["avoid", "prefer"]
+    source: Literal["manual"] = "manual"
+    is_sample: bool
+
+
+class ProfileResponse(BaseModel):
+    user: UserResponse
+    avoid_ingredients: list[IngredientPreferenceResponse]
+    preferred_ingredients: list[IngredientPreferenceResponse]
