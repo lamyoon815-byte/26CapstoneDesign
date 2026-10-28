@@ -12,3 +12,10 @@ site/PRODUCT.md
 
 # 흑백 화면 흐름 스케치 (기획 확인용)
 sketch/
+
+
+.venv/
+.venv313/
+__pycache__/
+data/*.db
+data/*.db-*
