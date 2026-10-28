@@ -151,3 +151,27 @@ class CartResponse(BaseModel):
     item_count: int
     total_quantity: int
     subtotal: int
+
+
+
+class CartWarningItem(BaseModel):
+    warning_id: str
+    type: Literal["personal_avoid", "personal_suspect"]
+    sources: list[Literal["personal_avoid", "personal_suspect"]]
+    product_id: int
+    product_name: str
+    ingredient_id: int
+    ingredient_name: str
+    is_sample: bool
+    message: str
+    suspect_evidence: SuspectItem | None = None
+
+
+class CartWarningsResponse(BaseModel):
+    items: list[CartWarningItem]
+    total: int
+    affected_product_count: int
+    missing_cart_ingredient_product_ids: list[int]
+    missing_review_ingredient_product_ids: list[int]
+    rule_version: str
+    notice: str

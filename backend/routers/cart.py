@@ -5,7 +5,8 @@ from sqlmodel import Session, select
 from backend.db import engine
 from backend.dependencies import get_current_user
 from backend.models import CartItem, Product, User
-from backend.schemas import CartItemRequest, CartItemResponse, CartResponse
+from backend.schemas import CartItemRequest, CartItemResponse, CartResponse, CartWarningsResponse
+from backend.services.cart_warnings import analyze_cart_warnings
 
 router = APIRouter(prefix="/api/me/cart", tags=["장바구니"])
 
@@ -84,3 +85,10 @@ def delete_cart_item(
             session.delete(item)
             session.commit()
         return build_cart_response(session, user.id)
+
+
+
+@router.get("/warnings", response_model=CartWarningsResponse)
+def get_cart_warnings(user: User = Depends(get_current_user)):
+    with Session(engine) as session:
+        return analyze_cart_warnings(session, user.id)
