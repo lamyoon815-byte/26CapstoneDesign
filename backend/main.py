@@ -1,3 +1,9 @@
+import os
+
+from dotenv import load_dotenv
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.middleware.sessions import SessionMiddleware
+
 from contextlib import asynccontextmanager
 from pathlib import Path
 
@@ -9,8 +15,17 @@ from sqlmodel import Session, SQLModel, select
 from backend.db import engine
 from backend.models import Product, ProductListResponse
 
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+
+from backend.routers.auth import router as auth_router
 
 ROOT = Path(__file__).resolve().parent.parent
+
+load_dotenv(ROOT / ".env")
+SESSION_SECRET = os.getenv("SESSION_SECRET")
+if not SESSION_SECRET or len(SESSION_SECRET) < 32:
+    raise RuntimeError(".env에 충분히 긴 SESSION_SECRET을 설정해주세요.")
 
 
 def initialize_database():
@@ -68,6 +83,79 @@ app = FastAPI(
     title="PERSONGAL API",
     lifespan=lifespan,
 )
+
+app.add_middleware(
+    SessionMiddleware,
+    secret_key=SESSION_SECRET,
+    session_cookie="persongal_session",
+    max_age=60 * 60 * 8,
+    same_site="lax",
+    https_only=False,  # 로컬 HTTP용. HTTPS 배포 시 True로 변경.
+)
+
+app.include_router(auth_router)
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_error_handler(request, exc):
+    content = (
+        exc.detail if isinstance(exc.detail, dict)
+        else {"code": f"HTTP_{exc.status_code}", "message": str(exc.detail)}
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content=content,
+        headers=exc.headers,
+    )
+
+
+ALLOWED_ORIGINS = {
+    "http://127.0.0.1:8000",
+    "http://localhost:8000",
+}
+
+
+@app.middleware("http")
+async def check_request_origin(request, call_next):
+    is_api_change = (
+        request.url.path.startswith("/api/")
+        and request.method in {"POST", "PUT", "PATCH", "DELETE"}
+    )
+    if is_api_change:
+        origin = request.headers.get("origin")
+        fetch_site = request.headers.get("sec-fetch-site")
+        if (
+            (origin is not None and origin not in ALLOWED_ORIGINS)
+            or fetch_site == "cross-site"
+        ):
+            return JSONResponse(
+                status_code=403,
+                content={
+                    "code": "ORIGIN_NOT_ALLOWED",
+                    "message": "허용되지 않은 주소에서 보낸 요청이에요.",
+                },
+            )
+
+    response = await call_next(request)
+    if request.url.path.startswith("/api/auth/"):
+        response.headers["Cache-Control"] = "no-store"
+    return response
+
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error_handler(request, exc):
+    return JSONResponse(
+        status_code=422,
+        content={
+            "code": "VALIDATION_ERROR",
+            "message": (
+                "입력값을 확인해주세요. "
+                "이메일 형식, 비밀번호 8~128자, "
+                "이름 1~50자를 확인해주세요."
+            ),
+        },
+    )
 
 
 @app.get("/api/health")

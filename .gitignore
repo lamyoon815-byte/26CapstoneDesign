@@ -19,3 +19,6 @@ sketch/
 __pycache__/
 data/*.db
 data/*.db-*
+
+# Local secrets
+.env

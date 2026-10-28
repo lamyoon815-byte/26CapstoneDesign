@@ -34,3 +34,17 @@ class UserResponse(BaseModel):
 
 class SignupResponse(BaseModel):
     user: UserResponse
+
+
+class LoginRequest(BaseModel):
+    email: EmailStr = Field(max_length=320)
+    password: str = Field(min_length=1, max_length=128)
+
+    @field_validator("email")
+    @classmethod
+    def normalize_email(cls, value: str) -> str:
+        return value.strip().lower()
+
+
+class AuthResponse(BaseModel):
+    user: UserResponse
