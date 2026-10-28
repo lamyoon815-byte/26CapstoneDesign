@@ -80,3 +80,33 @@ class ReviewResponse(BaseModel):
     purchase_id: int
     review_status: Literal["good", "bad"] | None
     reviewed_at: datetime | None
+
+
+
+class SuspectEvidence(BaseModel):
+    purchase_id: int
+    product_id: int
+    product_name: str
+    image_url: str
+    review_status: Literal["good", "bad"]
+
+
+class SuspectItem(BaseModel):
+    ingredient_id: int
+    ingredient_name: str
+    is_sample: bool
+    state: Literal["candidate", "pending"]
+    bad_count: int
+    good_count: int
+    score: float
+    reason: str
+    products: list[SuspectEvidence]
+
+
+class SuspectListResponse(BaseModel):
+    items: list[SuspectItem]
+    total: int
+    evaluated_product_count: int
+    missing_ingredient_product_ids: list[int]
+    rule_version: str
+    notice: str

@@ -62,3 +62,20 @@ class Purchase(SQLModel, table=True):
     # 리뷰 시각은 UTC 시간대를 포함해 저장·응답합니다.
     reviewed_at: datetime | None = Field(default=None)
     is_sample: bool = Field(default=False)
+
+
+
+class Ingredient(SQLModel, table=True):
+    __tablename__ = "ingredients"
+
+    id: int | None = Field(default=None, primary_key=True)
+    code: str = Field(unique=True, index=True)
+    name: str
+    is_sample: bool = Field(default=False)
+
+
+class ProductIngredient(SQLModel, table=True):
+    __tablename__ = "product_ingredients"
+
+    product_id: int = Field(foreign_key="products.id", primary_key=True)
+    ingredient_id: int = Field(foreign_key="ingredients.id", primary_key=True)
