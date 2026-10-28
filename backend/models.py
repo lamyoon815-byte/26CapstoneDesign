@@ -1,4 +1,6 @@
-from datetime import datetime, timezone
+from datetime import date, datetime, timezone
+
+from sqlalchemy import CheckConstraint
 
 from sqlmodel import Field, SQLModel
 
@@ -40,3 +42,23 @@ class User(SQLModel, table=True):
     created_at: datetime = Field(
         default_factory=lambda: datetime.now(timezone.utc)
     )
+
+
+class Purchase(SQLModel, table=True):
+    __tablename__ = "purchases"
+    __table_args__ = (
+        CheckConstraint(
+            "review_status IS NULL OR review_status IN ('good', 'bad')",
+            name="ck_purchase_review_status",
+        ),
+    )
+
+    id: int | None = Field(default=None, primary_key=True)
+    user_id: int = Field(foreign_key="users.id", index=True)
+    product_id: int = Field(foreign_key="products.id", index=True)
+    purchased_at: date
+    paid_price: int = Field(ge=0)
+    review_status: str | None = Field(default=None)
+    # 리뷰 시각은 UTC 시간대를 포함해 저장·응답합니다.
+    reviewed_at: datetime | None = Field(default=None)
+    is_sample: bool = Field(default=False)

@@ -1,3 +1,6 @@
+from datetime import date, datetime
+from typing import Literal
+
 # 가입·로그인 입력, 사용자 응답 형식
 
 from pydantic import BaseModel, EmailStr, Field, field_validator
@@ -48,3 +51,32 @@ class LoginRequest(BaseModel):
 
 class AuthResponse(BaseModel):
     user: UserResponse
+
+
+
+class PurchaseResponse(BaseModel):
+    id: int
+    product_id: int
+    brand: str
+    name: str
+    image_url: str
+    purchased_at: date
+    paid_price: int
+    review_status: Literal["good", "bad"] | None
+    reviewed_at: datetime | None
+    is_sample: bool
+
+
+class PurchaseListResponse(BaseModel):
+    items: list[PurchaseResponse]
+    total: int
+
+
+class ReviewRequest(BaseModel):
+    review_status: Literal["good", "bad"] | None
+
+
+class ReviewResponse(BaseModel):
+    purchase_id: int
+    review_status: Literal["good", "bad"] | None
+    reviewed_at: datetime | None

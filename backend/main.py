@@ -19,6 +19,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 
 from backend.routers.auth import router as auth_router
+from backend.routers.purchases import router as purchases_router
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -94,6 +95,7 @@ app.add_middleware(
 )
 
 app.include_router(auth_router)
+app.include_router(purchases_router)
 
 
 @app.exception_handler(StarletteHTTPException)
@@ -137,7 +139,7 @@ async def check_request_origin(request, call_next):
             )
 
     response = await call_next(request)
-    if request.url.path.startswith("/api/auth/"):
+    if request.url.path.startswith(("/api/auth/", "/api/me/")):
         response.headers["Cache-Control"] = "no-store"
     return response
 
@@ -149,11 +151,7 @@ async def validation_error_handler(request, exc):
         status_code=422,
         content={
             "code": "VALIDATION_ERROR",
-            "message": (
-                "입력값을 확인해주세요. "
-                "이메일 형식, 비밀번호 8~128자, "
-                "이름 1~50자를 확인해주세요."
-            ),
+            "message": "입력값의 형식과 허용된 값을 확인해주세요.",
         },
     )
 
