@@ -1,6 +1,6 @@
 from datetime import date, datetime, timezone
 
-from sqlalchemy import CheckConstraint
+from sqlalchemy import CheckConstraint, UniqueConstraint
 
 from sqlmodel import Field, SQLModel
 
@@ -109,3 +109,30 @@ class CartItem(SQLModel, table=True):
     user_id: int = Field(foreign_key="users.id", primary_key=True)
     product_id: int = Field(foreign_key="products.id", primary_key=True)
     quantity: int
+
+
+
+class IngredientRule(SQLModel, table=True):
+    __tablename__ = "ingredient_rules"
+    __table_args__ = (
+        CheckConstraint(
+            "ingredient_a_id < ingredient_b_id",
+            name="ck_ingredient_rule_order",
+        ),
+        UniqueConstraint(
+            "ingredient_a_id",
+            "ingredient_b_id",
+            name="uq_ingredient_rule_pair",
+        ),
+    )
+
+    id: int | None = Field(default=None, primary_key=True)
+    code: str = Field(unique=True, index=True)
+    name: str
+    ingredient_a_id: int = Field(foreign_key="ingredients.id", index=True)
+    ingredient_b_id: int = Field(foreign_key="ingredients.id", index=True)
+    condition_text: str
+    message: str
+    source_url: str | None = Field(default=None)
+    is_sample: bool = Field(default=False)
+    enabled: bool = Field(default=False)

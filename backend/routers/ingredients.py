@@ -1,10 +1,12 @@
+from sqlalchemy.orm import aliased
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
 from backend.db import engine
 from backend.dependencies import get_current_user
-from backend.models import Ingredient, Product, ProductIngredient, User
-from backend.schemas import SuspectListResponse
+from backend.models import Ingredient, IngredientRule, Product, ProductIngredient, User
+from backend.schemas import SuspectListResponse, IngredientRuleListResponse, IngredientRuleResponse
 from backend.services.suspects import analyze_suspects
 
 router = APIRouter(tags=["성분 분석"])
@@ -61,3 +63,35 @@ def search_ingredients(q: str = Query(default="", max_length=100)):
             ],
             "count": len(rows),
         }
+
+
+
+@router.get("/api/ingredient-rules", response_model=IngredientRuleListResponse)
+def get_ingredient_rules():
+    ingredient_a = aliased(Ingredient)
+    ingredient_b = aliased(Ingredient)
+    with Session(engine) as session:
+        rows = session.exec(
+            select(IngredientRule, ingredient_a, ingredient_b)
+            .join(ingredient_a, IngredientRule.ingredient_a_id == ingredient_a.id)
+            .join(ingredient_b, IngredientRule.ingredient_b_id == ingredient_b.id)
+            .order_by(IngredientRule.id)
+        ).all()
+        items = [
+            IngredientRuleResponse(
+                id=rule.id,
+                code=rule.code,
+                name=rule.name,
+                ingredient_a_id=a.id,
+                ingredient_a_name=a.name,
+                ingredient_b_id=b.id,
+                ingredient_b_name=b.name,
+                condition_text=rule.condition_text,
+                message=rule.message,
+                source_url=rule.source_url,
+                is_sample=rule.is_sample,
+                enabled=rule.enabled,
+            )
+            for rule, a, b in rows
+        ]
+        return IngredientRuleListResponse(items=items, total=len(items))

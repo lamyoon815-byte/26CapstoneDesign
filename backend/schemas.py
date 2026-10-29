@@ -198,3 +198,24 @@ class CartWarningsResponse(BaseModel):
     missing_review_ingredient_product_ids: list[int]
     rule_version: str
     notice: str
+
+
+
+class IngredientRuleResponse(BaseModel):
+    id: int
+    code: str
+    name: str
+    ingredient_a_id: int
+    ingredient_a_name: str
+    ingredient_b_id: int
+    ingredient_b_name: str
+    condition_text: str
+    message: str
+    source_url: str | None
+    is_sample: bool
+    enabled: bool
+
+
+class IngredientRuleListResponse(BaseModel):
+    items: list[IngredientRuleResponse]
+    total: int
