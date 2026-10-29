@@ -9,6 +9,7 @@ from backend.models import (
 )
 from backend.schemas import CartWarningItem, CartWarningsResponse
 from backend.services.suspects import analyze_suspects
+from backend.services.cart_duplicates import analyze_cart_duplicates
 
 
 def analyze_cart_warnings(session: Session, user_id: int) -> CartWarningsResponse:
@@ -78,17 +79,28 @@ def analyze_cart_warnings(session: Session, user_id: int) -> CartWarningsRespons
             )
         )
 
+    duplicate_items = analyze_cart_duplicates(cart_products, ingredient_rows)
+    duplicate_product_ids = {
+        product.product_id
+        for item in duplicate_items
+        for product in item.products
+    }
+
     return CartWarningsResponse(
         items=warnings,
         total=len(warnings),
         affected_product_count=len({w.product_id for w in warnings}),
+        duplicate_items=duplicate_items,
+        duplicate_total=len(duplicate_items),
+        duplicate_affected_product_count=len(duplicate_product_ids),
         missing_cart_ingredient_product_ids=sorted(
             set(products_by_id) - covered_product_ids
         ),
         missing_review_ingredient_product_ids=analysis.missing_ingredient_product_ids,
-        rule_version="cart-personal-v1",
+        rule_version="cart-personal-duplicate-v2",
         notice=(
-            "직접 지정한 성분과 리뷰 기반 추정을 비교한 개인 성분 안내입니다. "
-            "의학적 진단이 아니며, 경고가 없다는 것이 안전성을 보장하지는 않습니다."
+            "직접 지정 성분·리뷰 기반 추정·상품 간 성분 중복을 안내하는 결과입니다. "
+            "의학적 진단이 아니며, 성분 중복만으로 위험성을 판단하지 않습니다. "
+            "경고가 없다는 것이 안전성을 보장하지는 않습니다."
         ),
     )

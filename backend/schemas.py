@@ -167,10 +167,33 @@ class CartWarningItem(BaseModel):
     suspect_evidence: SuspectItem | None = None
 
 
+class CartDuplicateProduct(BaseModel):
+    product_id: int
+    product_name: str
+
+
+class CartDuplicateIngredient(BaseModel):
+    ingredient_id: int
+    ingredient_name: str
+    is_sample: bool
+
+
+class CartDuplicateItem(BaseModel):
+    warning_id: str
+    type: Literal["cart_duplicate"] = "cart_duplicate"
+    level: Literal["info"] = "info"
+    products: list[CartDuplicateProduct]
+    ingredients: list[CartDuplicateIngredient]
+    message: str
+
+
 class CartWarningsResponse(BaseModel):
     items: list[CartWarningItem]
     total: int
     affected_product_count: int
+    duplicate_items: list[CartDuplicateItem] = Field(default_factory=list)
+    duplicate_total: int = 0
+    duplicate_affected_product_count: int = 0
     missing_cart_ingredient_product_ids: list[int]
     missing_review_ingredient_product_ids: list[int]
     rule_version: str
