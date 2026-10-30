@@ -10,6 +10,7 @@ from backend.models import (
 from backend.schemas import CartWarningItem, CartWarningsResponse
 from backend.services.suspects import analyze_suspects
 from backend.services.cart_duplicates import analyze_cart_duplicates
+from backend.services.cart_conflicts import analyze_cart_conflicts
 
 
 def analyze_cart_warnings(session: Session, user_id: int) -> CartWarningsResponse:
@@ -86,6 +87,13 @@ def analyze_cart_warnings(session: Session, user_id: int) -> CartWarningsRespons
         for product in item.products
     }
 
+    cart_conflict_items = analyze_cart_conflicts(session, cart_products, ingredient_rows)
+    cart_conflict_product_ids = {
+        product.product_id
+        for item in cart_conflict_items
+        for product in item.products
+    }
+
     return CartWarningsResponse(
         items=warnings,
         total=len(warnings),
@@ -93,14 +101,17 @@ def analyze_cart_warnings(session: Session, user_id: int) -> CartWarningsRespons
         duplicate_items=duplicate_items,
         duplicate_total=len(duplicate_items),
         duplicate_affected_product_count=len(duplicate_product_ids),
+        cart_conflict_items=cart_conflict_items,
+        cart_conflict_total=len(cart_conflict_items),
+        cart_conflict_affected_product_count=len(cart_conflict_product_ids),
         missing_cart_ingredient_product_ids=sorted(
             set(products_by_id) - covered_product_ids
         ),
         missing_review_ingredient_product_ids=analysis.missing_ingredient_product_ids,
-        rule_version="cart-personal-duplicate-v2",
+        rule_version="cart-personal-duplicate-demo-conflict-v3",
         notice=(
-            "직접 지정 성분·리뷰 기반 추정·상품 간 성분 중복을 안내하는 결과입니다. "
-            "의학적 진단이 아니며, 성분 중복만으로 위험성을 판단하지 않습니다. "
-            "경고가 없다는 것이 안전성을 보장하지는 않습니다."
+            "개인 성분 정보·상품 간 중복·시연용 조합 규칙을 비교한 결과입니다. "
+            "의학적 진단이 아닙니다. 성분 중복이나 가상 시연 규칙은 실제 위험성을 "
+            "뜻하지 않으며, 안내가 없다는 것이 안전성을 보장하지는 않습니다."
         ),
     )

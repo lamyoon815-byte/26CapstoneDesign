@@ -187,6 +187,30 @@ class CartDuplicateItem(BaseModel):
     message: str
 
 
+class CartConflictMatch(BaseModel):
+    left_product_id: int
+    left_ingredient_id: int
+    left_ingredient_name: str
+    right_product_id: int
+    right_ingredient_id: int
+    right_ingredient_name: str
+
+
+class CartConflictItem(BaseModel):
+    warning_id: str
+    type: Literal["cart_conflict"] = "cart_conflict"
+    level: Literal["info"] = "info"
+    rule_id: int
+    rule_code: str
+    rule_name: str
+    condition_text: str
+    source_url: str | None
+    is_sample: bool
+    products: list[CartDuplicateProduct]
+    matches: list[CartConflictMatch]
+    message: str
+
+
 class CartWarningsResponse(BaseModel):
     items: list[CartWarningItem]
     total: int
@@ -194,6 +218,9 @@ class CartWarningsResponse(BaseModel):
     duplicate_items: list[CartDuplicateItem] = Field(default_factory=list)
     duplicate_total: int = 0
     duplicate_affected_product_count: int = 0
+    cart_conflict_items: list[CartConflictItem] = Field(default_factory=list)
+    cart_conflict_total: int = 0
+    cart_conflict_affected_product_count: int = 0
     missing_cart_ingredient_product_ids: list[int]
     missing_review_ingredient_product_ids: list[int]
     rule_version: str
