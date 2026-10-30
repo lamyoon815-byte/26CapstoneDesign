@@ -23,6 +23,7 @@ from backend.routers.purchases import router as purchases_router
 from backend.routers.ingredients import router as ingredients_router
 from backend.routers.profile import router as profile_router
 from backend.routers.cart import router as cart_router
+from backend.routers.recommendations import router as recommendations_router
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -102,6 +103,7 @@ app.include_router(purchases_router)
 app.include_router(ingredients_router)
 app.include_router(profile_router)
 app.include_router(cart_router)
+app.include_router(recommendations_router)
 
 
 @app.exception_handler(StarletteHTTPException)

@@ -271,3 +271,35 @@ class IngredientRuleResponse(BaseModel):
 class IngredientRuleListResponse(BaseModel):
     items: list[IngredientRuleResponse]
     total: int
+
+
+
+class RecommendationItem(BaseModel):
+    product_id: int
+    brand: str
+    name: str
+    category: str
+    price: int
+    image_url: str
+    status: Literal["eligible", "excluded", "unassessed"]
+    reasons: list[str]
+    cautions: list[str]
+    avoid_ingredient_ids: list[int]
+    preferred_ingredient_ids: list[int]
+    suspect_ingredient_ids: list[int]
+    latest_review_status: Literal["good", "bad"] | None
+    has_ingredient_data: bool
+    has_sample_ingredients: bool
+
+
+class RecommendationResponse(BaseModel):
+    items: list[RecommendationItem]
+    total: int
+    page: int
+    page_size: int
+    excluded_items: list[RecommendationItem]
+    excluded_total: int
+    unassessed_items: list[RecommendationItem]
+    unassessed_total: int
+    rule_version: str
+    notice: str
