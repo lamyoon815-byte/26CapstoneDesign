@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 
 from backend.db import engine
@@ -7,7 +7,7 @@ from backend.models import (
     Ingredient, Product, ProductIngredient, User, UserIngredientPreference,
 )
 from backend.schemas import (
-    PersonalIngredientAnalysis, ProductAnalysisResponse,
+    PersonalIngredientAnalysis, ProductAnalysisResponse, ProductAlternativesResponse,
     ProductDetailResponse, ProductIngredientInfo,
 )
 from backend.services.recommendations import get_recommendations
@@ -100,4 +100,38 @@ def product_analysis(product_id: int, user: User = Depends(get_current_user)):
             ingredient_analysis=ingredient_analysis,
             rule_version=recommendations.rule_version,
             notice=recommendations.notice + " 성분별 표시가 없다는 것이 안전성을 뜻하지는 않습니다.",
+        )
+
+
+@router.get(
+    "/api/me/products/{product_id}/alternatives",
+    response_model=ProductAlternativesResponse,
+)
+def product_alternatives(
+    product_id: int,
+    limit: int = Query(default=3, ge=1, le=12),
+    user: User = Depends(get_current_user),
+):
+    with Session(engine) as session:
+        product = get_product_or_404(session, product_id)
+        result = get_recommendations(
+            session=session,
+            user_id=user.id,
+            category=product.category,
+            page=1,
+            page_size=limit,
+            exclude_product_id=product.id,
+        )
+        return ProductAlternativesResponse(
+            source_product_id=product.id,
+            category=product.category,
+            items=result.items,
+            total=result.total,
+            limit=limit,
+            rule_version=result.rule_version,
+            notice=(
+                result.notice
+                + " 같은 카테고리에서 기준 상품을 제외한 후보입니다."
+                + " 기준 상품보다 안전하거나 더 잘 맞는다는 의미는 아닙니다."
+            ),
         )

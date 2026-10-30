@@ -25,6 +25,7 @@ from backend.routers.profile import router as profile_router
 from backend.routers.cart import router as cart_router
 from backend.routers.recommendations import router as recommendations_router
 from backend.routers.products import router as products_router
+from backend.routers.personal_color import router as personal_color_router
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -106,6 +107,7 @@ app.include_router(profile_router)
 app.include_router(cart_router)
 app.include_router(recommendations_router)
 app.include_router(products_router)
+app.include_router(personal_color_router)
 
 
 @app.exception_handler(StarletteHTTPException)

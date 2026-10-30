@@ -136,3 +136,15 @@ class IngredientRule(SQLModel, table=True):
     source_url: str | None = Field(default=None)
     is_sample: bool = Field(default=False)
     enabled: bool = Field(default=False)
+
+
+class PersonalColorResult(SQLModel, table=True):
+    __tablename__ = "personal_color_results"
+
+    user_id: int = Field(foreign_key="users.id", primary_key=True)
+    season: str
+    season_ko: str
+    season_full: str
+    tone: str
+    confidence_level: str
+    diagnosed_at: datetime

@@ -14,12 +14,15 @@ def get_recommendations(
     page: int,
     page_size: int,
     product_id: int | None = None,
+    exclude_product_id: int | None = None,
 ) -> RecommendationResponse:
     statement = select(Product)
     if category:
         statement = statement.where(Product.category == category)
     if product_id is not None:
         statement = statement.where(Product.id == product_id)
+    if exclude_product_id is not None:
+        statement = statement.where(Product.id != exclude_product_id)
     products = session.exec(statement.order_by(Product.id)).all()
 
     preferences = session.exec(

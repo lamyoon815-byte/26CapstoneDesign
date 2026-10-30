@@ -337,3 +337,28 @@ class ProductAnalysisResponse(BaseModel):
     ingredient_analysis: list[PersonalIngredientAnalysis]
     rule_version: str
     notice: str
+
+
+class ProductAlternativesResponse(BaseModel):
+    source_product_id: int
+    category: str
+    items: list[RecommendationItem]
+    total: int
+    limit: int
+    rule_version: str
+    notice: str
+
+
+class PersonalColorResponse(BaseModel):
+    season: Literal["spring", "summer", "autumn", "winter"]
+    season_ko: str
+    season_full: str
+    tone: Literal["spring_warm", "summer_cool", "autumn_warm", "winter_cool"]
+    # AI가 확률을 제공하지 않으므로 임의로 수치로 변환하지 않습니다.
+    confidence: float | None = None
+    confidence_level: Literal["low", "medium", "high"]
+    diagnosed_at: datetime
+
+
+class PersonalColorLatestResponse(BaseModel):
+    result: PersonalColorResponse | None
