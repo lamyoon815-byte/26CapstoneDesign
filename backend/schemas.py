@@ -303,3 +303,37 @@ class RecommendationResponse(BaseModel):
     unassessed_total: int
     rule_version: str
     notice: str
+
+
+class ProductIngredientInfo(BaseModel):
+    ingredient_id: int
+    ingredient_name: str
+    is_sample: bool
+
+
+class ProductDetailResponse(BaseModel):
+    product_id: int
+    brand: str
+    name: str
+    category: str
+    price: int
+    image_url: str
+    color_hex: str | None
+    ingredients: list[ProductIngredientInfo]
+    has_ingredient_data: bool
+
+
+class PersonalIngredientAnalysis(BaseModel):
+    ingredient_id: int
+    ingredient_name: str
+    is_sample: bool
+    manual_preference: Literal["avoid", "prefer"] | None
+    review_state: Literal["candidate", "pending"] | None
+    review_evidence: SuspectItem | None
+
+
+class ProductAnalysisResponse(BaseModel):
+    assessment: RecommendationItem
+    ingredient_analysis: list[PersonalIngredientAnalysis]
+    rule_version: str
+    notice: str
