@@ -211,6 +211,25 @@ class CartConflictItem(BaseModel):
     message: str
 
 
+class PurchaseConflictEvidence(BaseModel):
+    purchase_id: int
+    purchased_at: date
+
+
+class PurchaseConflictItem(CartConflictItem):
+    type: Literal["purchase_conflict"] = "purchase_conflict"
+    cart_product_id: int
+    purchased_product_id: int
+    purchases: list[PurchaseConflictEvidence]
+
+
+class PurchaseConflictAnalysis(BaseModel):
+    items: list[PurchaseConflictItem]
+    window_start: date
+    window_end: date
+    missing_ingredient_product_ids: list[int]
+
+
 class CartWarningsResponse(BaseModel):
     items: list[CartWarningItem]
     total: int
@@ -221,6 +240,12 @@ class CartWarningsResponse(BaseModel):
     cart_conflict_items: list[CartConflictItem] = Field(default_factory=list)
     cart_conflict_total: int = 0
     cart_conflict_affected_product_count: int = 0
+    purchase_conflict_items: list[PurchaseConflictItem] = Field(default_factory=list)
+    purchase_conflict_total: int = 0
+    purchase_conflict_affected_product_count: int = 0
+    purchase_window_start: date | None = None
+    purchase_window_end: date | None = None
+    missing_recent_purchase_ingredient_product_ids: list[int] = Field(default_factory=list)
     missing_cart_ingredient_product_ids: list[int]
     missing_review_ingredient_product_ids: list[int]
     rule_version: str

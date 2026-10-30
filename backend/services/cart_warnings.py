@@ -11,6 +11,7 @@ from backend.schemas import CartWarningItem, CartWarningsResponse
 from backend.services.suspects import analyze_suspects
 from backend.services.cart_duplicates import analyze_cart_duplicates
 from backend.services.cart_conflicts import analyze_cart_conflicts
+from backend.services.purchase_conflicts import analyze_purchase_conflicts
 
 
 def analyze_cart_warnings(session: Session, user_id: int) -> CartWarningsResponse:
@@ -94,6 +95,11 @@ def analyze_cart_warnings(session: Session, user_id: int) -> CartWarningsRespons
         for product in item.products
     }
 
+    purchase_analysis = analyze_purchase_conflicts(session, user_id, cart_products)
+    purchase_conflict_product_ids = {
+        item.cart_product_id for item in purchase_analysis.items
+    }
+
     return CartWarningsResponse(
         items=warnings,
         total=len(warnings),
@@ -104,14 +110,21 @@ def analyze_cart_warnings(session: Session, user_id: int) -> CartWarningsRespons
         cart_conflict_items=cart_conflict_items,
         cart_conflict_total=len(cart_conflict_items),
         cart_conflict_affected_product_count=len(cart_conflict_product_ids),
+        purchase_conflict_items=purchase_analysis.items,
+        purchase_conflict_total=len(purchase_analysis.items),
+        purchase_conflict_affected_product_count=len(purchase_conflict_product_ids),
+        purchase_window_start=purchase_analysis.window_start,
+        purchase_window_end=purchase_analysis.window_end,
+        missing_recent_purchase_ingredient_product_ids=purchase_analysis.missing_ingredient_product_ids,
         missing_cart_ingredient_product_ids=sorted(
             set(products_by_id) - covered_product_ids
         ),
         missing_review_ingredient_product_ids=analysis.missing_ingredient_product_ids,
-        rule_version="cart-personal-duplicate-demo-conflict-v3",
+        rule_version="cart-personal-duplicate-demo-history-v4",
         notice=(
             "개인 성분 정보·상품 간 중복·시연용 조합 규칙을 비교한 결과입니다. "
-            "의학적 진단이 아닙니다. 성분 중복이나 가상 시연 규칙은 실제 위험성을 "
-            "뜻하지 않으며, 안내가 없다는 것이 안전성을 보장하지는 않습니다."
+            "최근 구매 비교는 한국 날짜 기준 최근 6개월 구매 이력을 사용하며, "
+            "구매한 상품을 현재 사용 중이라는 뜻은 아닙니다. "
+            "의학적 진단이 아니며, 가상 시연 규칙은 실제 위험성을 의미하지 않습니다."
         ),
     )
